@@ -1,0 +1,12 @@
+services:
+  app:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DB_FILE: /app/data/notes.db
+    volumes:
+      - notes-data:/app/data
+volumes:
+  notes-data:
