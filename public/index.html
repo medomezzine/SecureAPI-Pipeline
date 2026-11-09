@@ -4,13 +4,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SecureNotes training</title>
 <h1>SecureNotes training</h1>
-<p>Local learning page. Log in in another terminal, then enter the returned user ID.</p>
-<label>User ID <input id="uid" type="number"></label>
+<p>Local learning page. Log in in another terminal, then paste the returned token.</p>
+<label>Token <input id="token" size="52"></label>
 <button id="load">Load notes</button>
 <ul id="notes"></ul>
 <script>
 document.querySelector('#load').onclick = async () => {
-  const response = await fetch('/notes', { headers: { 'X-User-Id': document.querySelector('#uid').value } });
+  const response = await fetch('/notes', { headers: { Authorization: `Bearer ${document.querySelector('#token').value}` } });
   const notes = await response.json();
   // VULN: A03 Injection
   document.querySelector('#notes').innerHTML = notes.map(note => `<li><b>${note.title}</b>: ${note.content}</li>`).join('');
