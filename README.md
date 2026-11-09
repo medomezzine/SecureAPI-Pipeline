@@ -10,10 +10,10 @@ Use Node.js 22 or later and Docker Compose. Make a local environment file and re
 
 ```sh
 cp .env.example .env
-openssl rand -hex 32  # paste this as NOTES_ENCRYPTION_KEY
+node -e "const c=require('node:crypto'); console.log('JWT_SECRET='+c.randomBytes(32).toString('hex')); console.log('NOTES_ENCRYPTION_KEY='+c.randomBytes(32).toString('hex'))"
 ```
 
-Set `JWT_SECRET` to a long random value. On PowerShell, `Copy-Item .env.example .env` makes the file. Put the generated 64-character hex value in `NOTES_ENCRYPTION_KEY` and a separate random string in `JWT_SECRET`.
+On PowerShell, use `Copy-Item .env.example .env` for the first command. Copy each generated line into `.env`, replacing its matching placeholder. The encryption key must be 64 hexadecimal characters.
 
 Run with Docker:
 
