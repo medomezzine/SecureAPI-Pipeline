@@ -1,5 +1,5 @@
 process.env.JWT_SECRET = 'test-only-jwt-secret-that-is-long-enough';
-process.env.NOTES_ENCRYPTION_KEY = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+process.env.NOTES_ENCRYPTION_KEY = require('node:crypto').randomBytes(32).toString('hex');
 process.env.DB_FILE = ':memory:';
 
 const request = require('supertest');
