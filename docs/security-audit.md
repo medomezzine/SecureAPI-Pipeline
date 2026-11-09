@@ -1,13 +1,13 @@
 # Security audit: `vulnerable` branch
 
-This is a deliberately small, local-only training audit. Use two dummy users and dummy notes. Do not expose the app to a network or use real credentials. Commands below assume the app is running at `http://localhost:3000`; the `vulnerable` branch has no JWT and accepts the login-returned `X-User-Id` header.
+This is a deliberately small, local-only training audit. Use two dummy users and dummy notes. Do not expose the app to a network or use real credentials. Commands below assume the app is running at `http://localhost:3000`. Both branches use bearer-token login; `vulnerable` intentionally omits the note ownership check.
 
 ## 1. SQL injection in search
 
 - **OWASP:** A03 Injection
 - **Severity:** High
 - **Affected endpoint:** `GET /search?q=`
-- **Reproduce:** Log in as a dummy user and copy its `userId`. Create notes for two users. Then request `curl -i -H 'X-User-Id: 1' 'http://localhost:3000/search?q=%27%20OR%201%3D1%20--'`. The concatenated condition can return rows outside the intended title match and owner scope.
+- **Reproduce:** Log in as a dummy user, copy its token, and create notes for two users. Then request `curl -i -H 'Authorization: Bearer TOKEN_A' 'http://localhost:3000/search?q=%27%20OR%201%3D1%20--'`. The concatenated condition can return rows outside the intended title match and owner scope.
 - **Impact:** A caller can alter the SQL condition and expose notes belonging to other users.
 - **Fix on `main`:** Bind the search phrase and owner ID as SQL parameters.
 
@@ -29,7 +29,7 @@ db.prepare('SELECT ... WHERE owner_id = ? AND title LIKE ?')
 - **OWASP:** A01 Broken Access Control
 - **Severity:** High
 - **Affected endpoints:** `GET /notes/:id`, `DELETE /notes/:id`
-- **Reproduce:** User A creates a note and records its ID. Log in as user B, then run `curl -i -H 'X-User-Id: 2' http://localhost:3000/notes/1`. The vulnerable route returns user A's note. `curl -i -X DELETE -H 'X-User-Id: 2' http://localhost:3000/notes/1` can delete it.
+- **Reproduce:** User A creates a note and records its ID. Log in as user B, then run `curl -i -H 'Authorization: Bearer TOKEN_B' http://localhost:3000/notes/1`. The vulnerable route returns user A's note. `curl -i -X DELETE -H 'Authorization: Bearer TOKEN_B' http://localhost:3000/notes/1` can delete it.
 - **Impact:** Any logged-in user who guesses an ID can read or remove another user's private note.
 - **Fix on `main`:** Include the authenticated owner ID in both read and delete conditions; return 404 when no owned record matches.
 
@@ -74,7 +74,7 @@ bcrypt.compareSync(password, user.password_hash);
 - **OWASP:** A03 Injection
 - **Severity:** High
 - **Affected endpoint:** `POST /notes` (stored value); browser view at `/`
-- **Reproduce:** Create a dummy note with `curl -i -H 'X-User-Id: 1' -H 'Content-Type: application/json' -d '{"title":"demo","content":"<img src=x onerror=alert(1)>"}' http://localhost:3000/notes`. Open `http://localhost:3000`, enter user ID `1`, and load notes. The vulnerable page puts stored content into `innerHTML`, so the browser interprets it as markup.
+- **Reproduce:** Create a dummy note with `curl -i -H 'Authorization: Bearer TOKEN_A' -H 'Content-Type: application/json' -d '{"title":"demo","content":"<img src=x onerror=alert(1)>"}' http://localhost:3000/notes`. Open `http://localhost:3000`, paste user A's token, and load notes. The vulnerable page puts stored content into `innerHTML`, so the browser interprets it as markup.
 - **Impact:** A malicious note can run script in another viewer's browser context when shown.
 - **Fix on `main`:** Render user-controlled text with DOM `textContent`; Helmet supplies a Content-Security-Policy as an additional layer.
 

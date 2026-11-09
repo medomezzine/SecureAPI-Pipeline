@@ -43,7 +43,7 @@ Use `GET /notes/:id` to read one note and `DELETE /notes/:id` to delete it. Ever
 ## Branches
 
 - `main` is the fixed version: JWTs, bcrypt password hashes, ownership checks, input validation, parameterized queries, output-safe page rendering, and encrypted note content.
-- `vulnerable` is a deliberately flawed local training version. It uses a login-returned user ID header to keep the demonstrations short. It is not an alternate deployable app.
+- `vulnerable` is a deliberately flawed local training version with the four findings in the audit report. It also uses JWT authentication so the access-control exercise stays focused on checking note ownership. It is not an alternate deployable app.
 
 Switch versions with `git switch main` or `git switch vulnerable`. Each branch contains the CI workflow. The CI tests and security rules are expected to fail on `vulnerable`; that failure is the teaching demo. They should pass on `main` (tool databases and third-party service availability can affect external scanners).
 
