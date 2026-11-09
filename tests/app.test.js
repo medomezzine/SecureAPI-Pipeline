@@ -1,4 +1,4 @@
-process.env.JWT_SECRET = 'test-only-jwt-secret-that-is-long-enough';
+process.env.JWT_SECRET = require('node:crypto').randomBytes(32).toString('hex');
 process.env.NOTES_ENCRYPTION_KEY = require('node:crypto').randomBytes(32).toString('hex');
 process.env.DB_FILE = ':memory:';
 

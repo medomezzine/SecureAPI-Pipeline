@@ -80,7 +80,7 @@ jobs:
       - run: npm install
       - name: Start app for local scan
         run: |
-          export JWT_SECRET=workflow-only-test-secret
+          export JWT_SECRET="$(openssl rand -hex 32)"
           export NOTES_ENCRYPTION_KEY="$(openssl rand -hex 32)"
           export DB_FILE=/tmp/zap-notes.db
           npm start > /tmp/securenotes.log 2>&1 &
