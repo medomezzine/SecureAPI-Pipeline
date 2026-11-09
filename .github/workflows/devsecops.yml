@@ -1,0 +1,97 @@
+name: SecureNotes DevSecOps
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  tests:
+    name: Lint and unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install
+      - run: npm install --no-save jest supertest
+      - run: node --check src/app.js && node --check src/db.js && node --check src/server.js
+      - run: npx jest --runInBand
+  gitleaks:
+    name: Secret scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: gitleaks/gitleaks-action@v2
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gitleaks-report
+          path: results.sarif
+          if-no-files-found: warn
+  semgrep:
+    name: Static analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.x' }
+      - run: pip install semgrep
+      - name: Scan with community Node.js rules
+        run: mkdir -p reports && semgrep scan --config p/nodejs --config p/owasp-top-ten --json --output reports/semgrep.json --error
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: semgrep-report, path: reports/semgrep.json, if-no-files-found: warn }
+  dependencies:
+    name: Dependency and image scan
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: mkdir -p reports && npm install
+      - name: Save dependency audit report
+        run: npm audit --json > reports/npm-audit.json || true
+      - name: Fail on high or critical dependency findings
+        run: npm audit --audit-level=high
+      - name: Build training image
+        run: docker build -t securenotes:ci .
+      - name: Scan image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: securenotes:ci
+          format: json
+          output: reports/trivy.json
+          severity: HIGH,CRITICAL
+          exit-code: '1'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: dependency-and-trivy-reports, path: reports/, if-no-files-found: warn }
+  dast:
+    name: OWASP ZAP baseline
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm install
+      - name: Start app for local scan
+        run: |
+          export JWT_SECRET=workflow-only-test-secret
+          export NOTES_ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+          export DB_FILE=/tmp/zap-notes.db
+          npm start > /tmp/securenotes.log 2>&1 &
+          for attempt in {1..30}; do curl -fsS http://127.0.0.1:3000/ >/dev/null && exit 0; sleep 1; done
+          cat /tmp/securenotes.log
+          exit 1
+      - name: Scan local app with ZAP baseline
+        run: mkdir -p reports
+      - name: Run ZAP baseline scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: http://127.0.0.1:3000
+          cmd_options: '-J reports/zap.json -r reports/zap.html'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: zap-report, path: reports/zap.*, if-no-files-found: warn }
