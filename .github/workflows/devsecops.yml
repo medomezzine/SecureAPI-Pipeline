@@ -1,4 +1,4 @@
-name: SecureNotes DevSecOps
+name: SecureAPI-Pipeline
 on:
   push:
   pull_request:
@@ -58,11 +58,11 @@ jobs:
       - name: Fail on high or critical dependency findings
         run: npm audit --audit-level=high
       - name: Build training image
-        run: docker build -t securenotes:ci .
+        run: docker build -t secureapi-pipeline:ci .
       - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@0.36.0
         with:
-          image-ref: securenotes:ci
+          image-ref: secureapi-pipeline:ci
           format: json
           output: reports/trivy.json
           severity: HIGH,CRITICAL
