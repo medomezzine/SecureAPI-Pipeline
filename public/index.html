@@ -12,6 +12,7 @@
 document.querySelector('#load').onclick = async () => {
   const response = await fetch('/notes', { headers: { 'X-User-Id': document.querySelector('#uid').value } });
   const notes = await response.json();
+  // VULN: A03 Injection
   document.querySelector('#notes').innerHTML = notes.map(note => `<li><b>${note.title}</b>: ${note.content}</li>`).join('');
 };
 </script>
