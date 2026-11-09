@@ -3,9 +3,18 @@
   "version": "1.0.0",
   "description": "A local-only beginner DevSecOps security training project",
   "main": "src/server.js",
-  "scripts": { "start": "node src/server.js", "dev": "node --watch src/server.js" },
+  "scripts": { "start": "node src/server.js", "dev": "node --watch src/server.js", "test": "jest --runInBand", "lint": "node --check src/app.js && node --check src/db.js && node --check src/server.js" },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.8.1",
-    "express": "^4.21.2"
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^7.0.0"
   }
 }
