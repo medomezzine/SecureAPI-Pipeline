@@ -1,4 +1,4 @@
-# SecureNotes-DevSecOps
+# SecureAPI-Pipeline
 
 A small notes API for learning how OWASP risk analysis, a local security audit, and a DevSecOps pipeline fit together. It uses Node.js, Express, SQLite, and one plain HTML page.
 

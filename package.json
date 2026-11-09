@@ -1,5 +1,5 @@
 {
-  "name": "securenotes-devsecops",
+  "name": "secureapi-pipeline",
   "version": "1.0.0",
   "description": "A local-only beginner DevSecOps security training project",
   "main": "src/server.js",
