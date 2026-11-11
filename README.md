@@ -33,9 +33,9 @@ Open <http://localhost:3000>. The API listens on port 3000. Register and log in 
 ```sh
 curl -i -H 'Content-Type: application/json' -d '{"username":"alice","password":"a-long-demo-password"}' http://localhost:3000/register
 curl -s -H 'Content-Type: application/json' -d '{"username":"alice","password":"a-long-demo-password"}' http://localhost:3000/login
-curl -i -H 'Authorization: Bearer PASTE_TOKEN' -H 'Content-Type: application/json' -d '{"title":"first","content":"private text"}' http://localhost:3000/notes
-curl -i -H 'Authorization: Bearer PASTE_TOKEN' http://localhost:3000/notes
-curl -i -H 'Authorization: Bearer PASTE_TOKEN' 'http://localhost:3000/search?q=first'
+curl -i -H 'Authorization: Bearer PASTE_TOKEN' -H 'Content-Type: application/json' -d '{"title":"first","content":"private text"}' http://localhost:3000/notes # gitleaks:allow (placeholder only)
+curl -i -H 'Authorization: Bearer PASTE_TOKEN' http://localhost:3000/notes # gitleaks:allow (placeholder only)
+curl -i -H 'Authorization: Bearer PASTE_TOKEN' 'http://localhost:3000/search?q=first' # gitleaks:allow (placeholder only)
 ```
 
 Use `GET /notes/:id` to read one note and `DELETE /notes/:id` to delete it. Every note route requires `Authorization: Bearer <token>` and scopes access to the logged-in user.
