@@ -1,6 +1,8 @@
 FROM node:22-alpine
 WORKDIR /app
 COPY package*.json ./
+# Refresh npm's bundled packages; old CLI dependencies can carry image CVEs.
+RUN npm install --global npm@11
 RUN npm install --omit=dev
 COPY src ./src
 COPY public ./public
