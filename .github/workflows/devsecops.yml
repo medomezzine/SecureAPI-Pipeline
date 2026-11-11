@@ -87,14 +87,17 @@ jobs:
           for attempt in {1..30}; do curl -fsS http://127.0.0.1:3000/ >/dev/null && exit 0; sleep 1; done
           cat /tmp/securenotes.log
           exit 1
-      - name: Scan local app with ZAP baseline
-        run: mkdir -p reports && chmod -R a+rwX reports
       - name: Run ZAP baseline scan
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: http://127.0.0.1:3000
           allow_issue_writing: false
-          cmd_options: '-J reports/zap.json -r reports/zap.html -w report_md.md'
       - uses: actions/upload-artifact@v7
         if: always()
-        with: { name: zap-report, path: reports/zap.*,report_md.md, if-no-files-found: warn }
+        with:
+          name: zap-report
+          path: |
+            report_json.json
+            report_html.html
+            report_md.md
+          if-no-files-found: warn
