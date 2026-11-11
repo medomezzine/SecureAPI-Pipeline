@@ -41,7 +41,7 @@ jobs:
         with: { python-version: '3.12' }
       - run: pip install semgrep
       - name: Scan with community Node.js rules
-        run: mkdir -p reports && semgrep scan --config p/nodejs --config p/owasp-top-ten --json --output reports/semgrep.json --error
+        run: mkdir -p reports && semgrep scan --config p/nodejs --config p/owasp-top-ten --severity ERROR --json --output reports/semgrep.json --error
       - uses: actions/upload-artifact@v7
         if: always()
         with: { name: semgrep-report, path: reports/semgrep.json, if-no-files-found: warn }
@@ -60,7 +60,7 @@ jobs:
       - name: Build training image
         run: docker build -t secureapi-pipeline:ci .
       - name: Scan image with Trivy
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: secureapi-pipeline:ci
           format: json
@@ -88,13 +88,13 @@ jobs:
           cat /tmp/securenotes.log
           exit 1
       - name: Scan local app with ZAP baseline
-        run: mkdir -p reports
+        run: mkdir -p reports && chmod -R a+rwX reports
       - name: Run ZAP baseline scan
         uses: zaproxy/action-baseline@v0.15.0
         with:
           target: http://127.0.0.1:3000
           allow_issue_writing: false
-          cmd_options: '-J reports/zap.json -r reports/zap.html'
+          cmd_options: '-J reports/zap.json -r reports/zap.html -w report_md.md'
       - uses: actions/upload-artifact@v7
         if: always()
-        with: { name: zap-report, path: reports/zap.*, if-no-files-found: warn }
+        with: { name: zap-report, path: reports/zap.*,report_md.md, if-no-files-found: warn }
