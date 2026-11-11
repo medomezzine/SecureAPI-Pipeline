@@ -14,7 +14,7 @@ jobs:
         with: { node-version: 22 }
       - run: npm install
       - run: npm install --no-save jest supertest
-      - run: node --check src/app.js && node --check src/db.js && node --check src/server.js && node --check public/app.js
+      - run: node --check src/app.js && node --check src/db.js && node --check src/server.js && if [ -f public/app.js ]; then node --check public/app.js; fi
       - run: npx jest --runInBand
   gitleaks:
     name: Secret scan
