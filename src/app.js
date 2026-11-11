@@ -31,7 +31,7 @@ function encrypt(value) {
 }
 function decrypt(value) {
   const [iv, tag, data] = value.split('.').map(part => Buffer.from(part, 'base64'));
-  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+  const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv, { authTagLength: 16 });
   decipher.setAuthTag(tag);
   return Buffer.concat([decipher.update(data), decipher.final()]).toString('utf8');
 }
