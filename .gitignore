@@ -3,6 +3,7 @@ node_modules/
 data/
 coverage/
 reports/
+work/
 *.db
 *.db-shm
 *.db-wal
